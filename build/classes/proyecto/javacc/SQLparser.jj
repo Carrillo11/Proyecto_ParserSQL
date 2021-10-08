@@ -1,0 +1,260 @@
+options{
+    IGNORE_CASE=true ;
+}
+
+PARSER_BEGIN(SQLparser)
+public class SQLparser
+{}
+PARSER_END(SQLparser)
+
+SKIP:
+{
+	" "|"\n"|"\r"|"\r\n"|"\t"
+}
+
+TOKEN:
+{
+		<CREATE : "create">
+	|	<DROP : "drop">
+	|	<DATABASE : "database">
+	|	<TABLE	: "table">
+	|	<USE : "use">
+	|	<GO : "go">
+}
+
+TOKEN:
+{
+		<KEY : "primary key">
+	|	<NONULO : "not null">
+}
+
+TOKEN:
+{
+		<IPAREN : "(">
+	|	<DPAREN : ")">
+	|	<COMILLA : "'">
+	|	<PUNTO : ".">
+	|	<COMA : ",">
+	|	<COMILLADOBLE : "\"">
+}
+
+TOKEN:
+{
+		<ASIG : "=">
+	|	<EQ : "==">
+	|	<EQG : ">=">
+	|	<EQL : "<=">
+	|	<GREATER : ">">
+	|	<LESS : "<">
+	|	<NOTEQ : "<>">
+	|	<AND :	"and">
+	|	<OR : "or">
+	|	<NOT : "!=">
+}
+
+TOKEN:
+{
+		<SELECT : "select">
+	|	<ALL : "*">
+	|	<FROM : "from">
+	|	<INSERTINTO : "insert into">
+	|	<VALUES : "values">
+	|	<UPDATE : "update">
+	|	<SET : "set">
+	|	<DELETE : "delete">
+	|	<WHERE : "where">
+	|	<ORDERBY : "order by">
+	|	<ASC : "asc">
+	|	<DESC : "desc">
+}
+
+TOKEN:
+{
+		<VARCHAR : "varchar">
+	|	<INT : "int">
+	|	<DATE : "date">
+	|	<FLOAT : "float">
+	|	<CHAR : "char">
+	|	<NUMBER : (["0"-"9"])+>
+	|	<IDENTIFIER : ["a"-"z", "A"-"Z"](["a"-"z","A"-"Z","0"-"9","_"])*>
+	|	<DECIMAL : (["0"-"9"])+["."](["0"-"9"])+>
+	|	<CADENA : "'"["a"-"z","A"-"Z","0"-"9"," "](["a"-"z", "A"-"Z", "0"-"9", " ", ":", ";", "."])*"'">
+	|	<CARACTER : "'"["a"-"z", "A"-"Z", "0"-"9"]"'">
+	|	<DOUBLEPOINT : ":">
+}
+
+int inicio():
+{}
+{
+	(		
+			LOOKAHEAD(2)
+			creacion()	
+		|	usoBase()
+		|	creacionTabla()
+		|	eliminacion()
+		|	sentSelect()
+		|	sentInsert()
+		|	sentUpdate()
+		|	sentDelete()
+		|	<GO>
+	)*
+	<EOF>
+	{
+	  return 0;
+	}
+}
+  
+void creacion() throws Exception:
+{
+	Token t;
+}
+{
+	<CREATE>
+	<DATABASE>
+	t = <IDENTIFIER>
+	{ VerificadorNombres.crearDatabase(t.image);}
+}
+
+void usoBase():
+{
+	Token t;
+}
+{
+	<USE>
+	t = <IDENTIFIER>
+	{ VerificadorNombres.usedb = t.image; }
+}
+
+void creacionTabla() throws Exception:
+{
+	Token t;
+}
+{
+	<CREATE><TABLE>
+	t = <IDENTIFIER>
+	{ VerificadorNombres.crearTabla(t.image);}
+	<IPAREN> camposTabla() <DPAREN>
+}
+
+void camposTabla():
+{}
+{	
+	<IDENTIFIER> (tVarchar()|<INT>|<DATE>|<CHAR>)
+	(
+		<COMA><IDENTIFIER> (tVarchar()|<INT>|<DATE>|<CHAR>)
+	)*
+}
+
+void tVarchar():
+{}
+{
+	<VARCHAR><IPAREN><NUMBER><DPAREN>
+}
+
+void eliminacion():
+{}
+{
+	<DROP> (<DATABASE>|<TABLE>) <IDENTIFIER>
+}
+
+void sentSelect():
+{}
+{
+	<SELECT>
+	(
+		<ALL>
+		|	camposSelect()
+	)
+	<FROM><IDENTIFIER> [opcionesWhere()] [opcionesOrder()]
+}
+
+void camposSelect():
+{}
+{
+	<IDENTIFIER>
+	(
+		<COMA><IDENTIFIER>
+	)*
+}
+
+void opcionesWhere():
+{}
+{
+	<WHERE><IDENTIFIER> comparador() valor()
+	(
+		opLogico() <IDENTIFIER> comparador() valor()
+	)*
+}
+
+void comparador():
+{}
+{
+		<ASIG>
+	|	<EQG>
+	|	<EQL>
+	|	<GREATER>
+	|	<LESS>
+	|	<NOTEQ>
+	|	<NOT>
+}
+
+void opLogico():
+{}
+{
+		<AND>
+	|	<OR>
+}
+
+void valor():
+{}
+{
+		<NUMBER>
+	|	<DECIMAL>
+	|	<CADENA>
+	|	<CARACTER>
+}
+
+void opcionesOrder():
+{}
+{
+	<ORDERBY><IDENTIFIER> (<ASC>|<DESC>)
+	(
+		<COMA><IDENTIFIER> (<ASC>|<DESC>)
+	)*
+}
+
+void sentInsert():
+{}
+{
+	<INSERTINTO><IDENTIFIER><VALUES><IPAREN> valoresInsert() <DPAREN>
+}
+
+void valoresInsert():
+{}
+{
+	valor()
+	(
+		<COMA> valor()
+	)*
+}
+
+void sentUpdate():
+{}
+{
+	<UPDATE><IDENTIFIER><SET> valoresUpdate() [opcionesWhere()]
+}
+
+void valoresUpdate():
+{}
+{
+	<IDENTIFIER><ASIG> valor()
+	(
+		<COMA><IDENTIFIER><ASIG> valor()
+	)*
+}
+
+void sentDelete():
+{}
+{
+	<DELETE><FROM><IDENTIFIER> [opcionesWhere()]
+}

@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -59,6 +60,7 @@ public class frmParser extends javax.swing.JFrame {
         lblTablas = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         txtTablas = new javax.swing.JTextArea();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Analizador Lexico");
@@ -127,6 +129,15 @@ public class frmParser extends javax.swing.JFrame {
         txtTablas.setRows(5);
         jScrollPane4.setViewportView(txtTablas);
 
+        jButton4.setBackground(new java.awt.Color(51, 153, 0));
+        jButton4.setText("Select");
+        jButton4.setEnabled(false);
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -134,13 +145,6 @@ public class frmParser extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton3)
-                        .addGap(135, 135, 135)
-                        .addComponent(jButton2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
@@ -157,9 +161,19 @@ public class frmParser extends javax.swing.JFrame {
                                 .addGap(17, 17, 17)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 553, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel2)))
+                                    .addComponent(jLabel2)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(10, 10, 10)
+                                        .addComponent(jButton3)
+                                        .addGap(147, 147, 147)
+                                        .addComponent(jButton2))))
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 570, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(14, Short.MAX_VALUE))))
+                        .addContainerGap(14, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton4)
+                        .addGap(36, 36, 36))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -173,10 +187,12 @@ public class frmParser extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3)
-                    .addComponent(jButton1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton2)
+                        .addComponent(jButton1)
+                        .addComponent(jButton4))
+                    .addComponent(jButton3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -192,11 +208,11 @@ public class frmParser extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        String entrada = txtEntrada.getText();
-        InputStream is = new ByteArrayInputStream(entrada.getBytes());
+        String entrada = txtEntrada.getText(); //Agarra todos los datos de la caja de texto
+        InputStream is = new ByteArrayInputStream(entrada.getBytes()); //el parser necesita un inputstream
 
         if(parser == null){
-            parser = new SQLparser(is);
+            parser = new SQLparser(is); //inicializacion del parser
         } else {
             SQLparser.ReInit(is);
         }
@@ -204,10 +220,11 @@ public class frmParser extends javax.swing.JFrame {
         try{
 
             switch (SQLparser.inicio()){
-                case 0 :
+                case 0 : //Sino se encuentra ningun erros entonces la sentencia es correcta
                 txtSalida.setForeground(Color.black);
                 txtSalida.setText("Sentencias correctas");
                 jButton2.setEnabled(true);
+                jButton4.setEnabled(true);
                 break;
             }
         } catch (Exception e) {
@@ -219,15 +236,18 @@ public class frmParser extends javax.swing.JFrame {
             } else {
                 error = e.getMessage().toString().replace("Was expecting one of:", "Se esperaba uno de los siguientes:").replace("<EOF>", "");
                 jButton2.setEnabled(false);
+                jButton4.setEnabled(false);
             }
             txtSalida.setText("Error en la sentencia.\n" + error);
             jButton2.setEnabled(false);
+            jButton4.setEnabled(false);
         } catch (Error e) {
             txtSalida.setForeground(Color.red);
             String error = e.getMessage().toString().replace("Was expecting one of:", "Se esperaba:").replace("<EOF>", "");
             error.replace("Was expecting one of:", "Se esperaba:");
             txtSalida.setText("Error en la sentencia.\n" + error);
             jButton2.setEnabled(false);
+            jButton4.setEnabled(false);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -262,8 +282,76 @@ public class frmParser extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        String entrada = txtEntrada.getText();
+        String salida =  "";
+        
+        try{
+        Connection con = Conexion.getMainConnection();
+        PreparedStatement query;
+        query = con.prepareCall(entrada);
+        int consulta2 = query.executeUpdate();
+        
+        if(consulta2 > 0){
+        JOptionPane.showMessageDialog(this, "Ejecucion Correcta");
+        txtSalida.setForeground(Color.black);
+        txtSalida.setText("Sentencias ejecutadas correctamente");
+        }
+        else{
+        JOptionPane.showMessageDialog(this, "Ejecucion correcta");
+        txtSalida.setForeground(Color.black);
+        txtSalida.setText("Sentencias ejecutadas correctamente");
+        }
+        con.close();
+        }catch(Exception e){
+            String error = e.getMessage();
+            txtSalida.setForeground(Color.red);
+            txtSalida.setText(error+"\nPrecione el boton Consulta Select para proceder.");
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        String entrada = txtEntrada.getText();
+        String salida = "";
+        
+        try{
+        Connection con = Conexion.getMainConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(entrada);
+        
+        ResultSetMetaData mdata = rs.getMetaData();
+        int colCount = mdata.getColumnCount();
+        Vector<String> colNombres = new Vector<String>();
+        int i = 0;
+        int contador = 0;
+        while(i < colCount){
+            i++;
+            colNombres.add(mdata.getColumnName(i));
+        }
+        
+        while(rs.next()){
+            for(i = 0; i < colNombres.size(); i++){
+            salida += rs.getString(colNombres.get(i))+ "\t";
+            }
+            contador++;
+            salida += "\n";
+        }
+        rs.close();
+        con.close();
+        
+        if(contador > 0){
+            txtSalida.setForeground(Color.black);
+            txtSalida.setText("Registros encontrados:\n" + salida);
+        }
+        else{
+        txtSalida.setForeground(Color.black);
+        txtSalida.setText("No se encontraron registros.\n");
+        }
+        }catch(Exception e){
+            String error = e.getMessage();
+            txtSalida.setForeground(Color.red);
+            txtSalida.setText(error);
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
     
     private void crearNodos(DefaultMutableTreeNode raiz) {
 		ArrayList<String> bases = new ArrayList<String>();
@@ -335,6 +423,7 @@ public class frmParser extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

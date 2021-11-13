@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-public class VerificadorNombres {
+public class Verificador {
 	public static String usedb = null;
 	
 	public static void crearDatabase(String nombre) throws Exception{

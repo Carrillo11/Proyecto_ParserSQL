@@ -66,14 +66,14 @@ public class SQLparser implements SQLparserConstants {
     jj_consume_token(CREATE);
     jj_consume_token(DATABASE);
     t = jj_consume_token(IDENTIFIER);
-          VerificadorNombres.crearDatabase(t.image);
+          Verificador.crearDatabase(t.image);
   }
 
   static final public void usoBase() throws ParseException {
         Token t;
     jj_consume_token(USE);
     t = jj_consume_token(IDENTIFIER);
-          VerificadorNombres.usedb = t.image;
+          Verificador.usedb = t.image;
   }
 
   static final public void creacionTabla() throws ParseException, Exception {
@@ -81,7 +81,7 @@ public class SQLparser implements SQLparserConstants {
     jj_consume_token(CREATE);
     jj_consume_token(TABLE);
     t = jj_consume_token(IDENTIFIER);
-          VerificadorNombres.crearTabla(t.image);
+          Verificador.crearTabla(t.image);
     jj_consume_token(IPAREN);
     camposTabla();
     jj_consume_token(DPAREN);
